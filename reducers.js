@@ -1,0 +1,40 @@
+// Computing stats on a list
+var myList = ee.List.sequence(1, 10);
+print(myList)
+
+// Use a reducer to compute min and max in the list
+var mean = myList.reduce(ee.Reducer.mean());
+print(mean);
+
+var geometry = ee.Geometry.Polygon([[
+  [82.60642647743225, 27.16350437805251],
+  [82.60984897613525, 27.1618529901377],
+  [82.61088967323303, 27.163695288375266],
+  [82.60757446289062, 27.16517483230927]
+]]);
+var s2 = ee.ImageCollection('COPERNICUS/S2_HARMONIZED');
+Map.centerObject(geometry);
+
+// Apply a reducer on a image collection
+var filtered = s2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30))
+  .filter(ee.Filter.date('2019-01-01', '2020-01-01'))
+  .filter(ee.Filter.bounds(geometry))
+  .select('B.*');
+
+print(filtered.size());
+var collMean = filtered.reduce(ee.Reducer.mean());
+print('Reducer on Collection', collMean);
+
+var image = ee.Image('COPERNICUS/S2/20190223T050811_20190223T051829_T44RPR');
+var rgbVis = {min: 0.0, max: 3000, bands: ['B4', 'B3', 'B2']};
+Map.addLayer(image, rgbVis, 'Image');
+Map.addLayer(geometry, {color: 'red'}, 'Farm');
+// If we want to compute the average value in each band,
+// we can use reduceRegion instead
+var stats = image.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: geometry,
+  scale: 100,
+  maxPixels: 1e10
+  });
+print(stats);

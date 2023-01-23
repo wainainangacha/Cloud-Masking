@@ -51,3 +51,6 @@ var chart = ui.Chart.image.series({
       hAxis: {title: '', format: 'YYYY-MMM'}
     })
 print(chart);
+
+// Delete the farm boundary from the previous script 
+// and add another farm at a location of your choice
